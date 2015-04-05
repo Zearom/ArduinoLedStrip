@@ -7,22 +7,29 @@ CRGB leds[NUM_LEDS];
 CRGB colors[4];
 int offset = 0;
 
-byte result[11] = {
-    B00100001,
-    B01000100,
-    B01000100,
-    B01000100,
-    B01000100,
-    B01000100
+byte result[5] = {
+    B01010101,
+    B01010101,
+    B01010101,
+    B01010101,
+    B01010101
   };
 
 void setup () {
   colors[0] = 0x000000;
-  colors[1] = 0xFF0000;
-  colors[2] = 0x00FF00;
-  colors[3] = 0x0000FF;
+  colors[1] = 0x100000;
+  colors[2] = 0x001000;
+  colors[3] = 0x000010;
 
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  for (int c = 1; c <= 3; c++) {
+    for (int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = colors[c];
+      FastLED.show();
+    }
+    delay(200);
+  }
+
   for (int i = 0; i < NUM_LEDS; i++) {
     leds[i] = colors[0];
     FastLED.show();
@@ -33,13 +40,26 @@ void setup () {
 
 void loop () {
   //Read data from serial --> result
-  
-  //run through result array (1 configbyte, 10 displaybytes)
-  for (int i = 1; i < 11; i++) {
-    displayByte(result[i], i*4-4);
+  if (Serial.available() > 0) {
+    //Read first byte to obtain the type of the message
+   byte bMessageType = Serial.read();
+   int messageType = (int) bMessageType;
+   
+   if (messageType == 2 || true) {
+     //the next five bytes are display bytes, read from buffer
+     byte bufferMessage[5];
+     for (int i = 0;i < 5; i++) {
+       bufferMessage[i] = Serial.read();
+       Serial.println((int) bufferMessage[i]);
+     }
+     
+     for (int i = 0; i < 5; i++) {
+        displayByte(bufferMessage[i], i*4);
+     }
+     FastLED.show();
+   }
   }
-  FastLED.show();
-  delay(1000);
+  delay(10);
 }
 
 void displayByte(byte displayByte, int ledIndex) {
