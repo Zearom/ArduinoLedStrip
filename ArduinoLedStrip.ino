@@ -17,9 +17,9 @@ byte result[5] = {
 
 void setup () {
   colors[0] = 0x000000;
-  colors[1] = 0x100000;
-  colors[2] = 0x001000;
-  colors[3] = 0x000010;
+  colors[1] = 0x001000;
+  colors[2] = 0x101000;
+  colors[3] = 0x100000;
 
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
   for (int c = 1; c <= 3; c++) {
@@ -45,12 +45,16 @@ void loop () {
    byte bMessageType = Serial.read();
    int messageType = (int) bMessageType;
    
-   if (messageType == 2 || true) {
+   if (messageType == 2) {
+     // wait if the serial buffer doesnt contain enough bytes for display
+     while (Serial.available() < 5) {
+       delay(1);
+     }
+     
      //the next five bytes are display bytes, read from buffer
      byte bufferMessage[5];
      for (int i = 0;i < 5; i++) {
        bufferMessage[i] = Serial.read();
-       Serial.println((int) bufferMessage[i]);
      }
      
      for (int i = 0; i < 5; i++) {
